@@ -2,42 +2,36 @@
 
 import axios from "axios";
 import https from "https";
-import { Dispatch, SetStateAction } from "react";
-import { Subscription, interval } from "rxjs";
-
-interface UserinfoDto {
-  username: string;
-  email: string;
-  roles: string[];
-  exp: number;
-}
+import { interval } from "rxjs";
 
 export class User {
-  static readonly ANONYMOUS = new User("", "", []);
+  static ANONYMOUS = new User("", "", []);
 
-  constructor(
-    readonly name: string,
-    readonly email: string,
-    readonly roles: string[]
-  ) { }
+  constructor(name, email, roles) {
+    this.name = name;
+    this.email = email;
+    this.roles = roles;
+  }
 
-  get isAuthenticated(): boolean {
+  get isAuthenticated() {
     return !!this.name;
   }
 
-  hasAnyRole(...roles: string[]): boolean {
-    return roles.some(role => this.roles.includes(role));
+  hasAnyRole(...roles) {
+    return roles.some((role) => this.roles.includes(role));
   }
 }
 
 export class UserService {
-  private refreshSub?: Subscription;
+  refreshSub = null;
 
-  constructor(private user: User, private setUser: Dispatch<SetStateAction<User>>) {
+  constructor(user, setUser) {
+    this.user = user;
+    this.setUser = setUser;
     this.refresh(user, setUser);
   }
 
-  private createAxiosInstance() {
+  createAxiosInstance() {
     return axios.create({
       baseURL: process.env.NEXT_PUBLIC_REVERSE_PROXY_URI,
       httpsAgent: new https.Agent({
@@ -46,10 +40,10 @@ export class UserService {
     });
   }
 
-  private async fetchUserData(): Promise<UserinfoDto | null> {
+  async fetchUserData() {
     const axiosInstance = this.createAxiosInstance();
     try {
-      const response = await axiosInstance.get<UserinfoDto>("/bff/api/me");
+      const response = await axiosInstance.get("/bff/api/me");
       return response.data;
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -57,7 +51,7 @@ export class UserService {
     }
   }
 
-  private updateUserIfNeeded(userData: UserinfoDto) {
+  updateUserIfNeeded(userData) {
     if (
       userData.username !== this.user.name ||
       userData.email !== this.user.email ||
@@ -71,7 +65,7 @@ export class UserService {
     }
   }
 
-  private scheduleRefresh(exp: number) {
+  scheduleRefresh(exp) {
     const now = Date.now();
     const delay = (exp * 1000 - now) * 0.8;
 
@@ -83,10 +77,7 @@ export class UserService {
     }
   }
 
-  async refresh(
-    user: User,
-    setUser: Dispatch<SetStateAction<User>>
-  ): Promise<void> {
+  async refresh(user, setUser) {
     const userData = await this.fetchUserData();
 
     if (userData) {
