@@ -21,6 +21,20 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/lib/auth/user.service.jsx", "app/lib/auth/logout.jsx", "app/lib/auth/login.jsx", "app/lib/auth/authentication.component.jsx"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "app/lib/auth/user.service.jsx",
+    "app/lib/auth/logout.jsx",
+    "app/lib/auth/login.jsx",
+    "app/lib/auth/authentication.component.jsx",
+    "app/about/page.jsx",
+    "app/login-error/page.jsx",
+    "app/layout.jsx",
+    "app/page.jsx",
+    "app/user-context.js"
+  ],
   "exclude": ["node_modules"]
 }
