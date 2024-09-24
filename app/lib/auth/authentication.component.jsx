@@ -1,13 +1,8 @@
-import { EventHandler } from "react";
+import { useUserContext } from "@/app/user-context";
 import Login from "./login";
 import Logout from "./logout";
-import { useUserContext } from "@/app/user-context";
 
-interface AuthenticationProperties {
-  onLogin: EventHandler<any>;
-}
-
-export default function Authentication({ onLogin }: AuthenticationProperties) {
+export default function Authentication({ onLogin }) {
   const user = useUserContext();
 
   return (

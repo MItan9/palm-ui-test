@@ -4,18 +4,13 @@ import { useUserContext } from "@/app/user-context";
 import axios from "axios";
 import https from "https";
 import { usePathname } from "next/navigation";
-import { EventHandler, FormEvent, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-enum LoginExperience {
-  DEFAULT,
-  IFRAME,
-}
-
-interface LoginOptionDto {
-  label: string;
-  loginUri: string;
-  isSameAuthority: boolean;
-}
+// Replace the enum with a plain object for JavaScript
+const LoginExperience = {
+  DEFAULT: 0,
+  IFRAME: 1,
+};
 
 const axiosInstance = axios.create({
   baseURL: `${process.env.NEXT_PUBLIC_REVERSE_PROXY_URI}`,
@@ -24,16 +19,12 @@ const axiosInstance = axios.create({
   }),
 });
 
-async function getLoginOptions(): Promise<Array<LoginOptionDto>> {
-  const response = await axiosInstance.get<Array<LoginOptionDto>>("/bff/login-options");
+async function getLoginOptions() {
+  const response = await axiosInstance.get("/bff/login-options");
   return response.data;
 }
 
-interface LoginProperties {
-  onLogin: EventHandler<any>;
-}
-
-export default function Login({ onLogin }: LoginProperties) {
+export default function Login({ onLogin }) {
   const user = useUserContext();
   const [loginUri, setLoginUri] = useState("");
   const [selectedLoginExperience, setSelectedLoginExperience] = useState(
@@ -42,7 +33,7 @@ export default function Login({ onLogin }: LoginProperties) {
   const [isLoginModalDisplayed, setIsLoginModalDisplayed] = useState(false);
   const [isIframeLoginPossible, setIframeLoginPossible] = useState(false);
   const currentPath = usePathname();
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const iframeRef = useRef(null);
 
   useEffect(() => {
     const iframe = iframeRef.current;
@@ -65,7 +56,7 @@ export default function Login({ onLogin }: LoginProperties) {
     }
   }
 
-  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+  async function onSubmit(event) {
     event.preventDefault();
     if (!loginUri) {
       return;
@@ -82,7 +73,7 @@ export default function Login({ onLogin }: LoginProperties) {
     );
     const loginUrl = url.toString();
     if (
-      +selectedLoginExperience === +LoginExperience.IFRAME &&
+      selectedLoginExperience === LoginExperience.IFRAME &&
       iframeRef.current
     ) {
       const iframe = iframeRef.current;
@@ -109,7 +100,7 @@ export default function Login({ onLogin }: LoginProperties) {
             value={selectedLoginExperience}
             onChange={(e) => {
               setSelectedLoginExperience(
-                +e?.target?.value === +LoginExperience.IFRAME
+                parseInt(e.target.value, 10) === LoginExperience.IFRAME
                   ? LoginExperience.IFRAME
                   : LoginExperience.DEFAULT
               );
