@@ -9,11 +9,7 @@ import { UserContext } from "./user-context";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }) {
   const [user, setUser] = useState(User.ANONYMOUS);
   const userService = new UserService(user, setUser);
 
@@ -28,7 +24,7 @@ export default function RootLayout({
             <div className="mt-2">
               <Authentication
                 onLogin={() => userService.refresh(user, setUser)}
-              ></Authentication>
+              />
             </div>
             <div className="mr-3"></div>
           </div>
