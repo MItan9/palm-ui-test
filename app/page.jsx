@@ -2,7 +2,6 @@
 
 import { useUserContext } from "@/app/user-context";
 import Link from "next/link";
-import { User } from "./lib/auth/user.service";
 
 export default function Home() {
   const user = useUserContext();
@@ -10,7 +9,7 @@ export default function Home() {
     ? `Hi ${user.name}, you are granted with ${rolesStr(user)}.`
     : "You are not authenticated.";
 
-  function rolesStr(user: User) {
+  function rolesStr(user) {
     if (!user?.roles?.length) {
       return "[]";
     }
