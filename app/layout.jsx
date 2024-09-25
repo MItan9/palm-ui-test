@@ -19,7 +19,7 @@ export default function RootLayout({ children }) {
         <UserContext.Provider value={user}>
           <div className="flex">
             <div className="m-auto"></div>
-            <h1 className="mt-2">React UI</h1>
+            {/* <h1 className="mt-2">React UI</h1> */}
             <div className="m-auto"></div>
             <div className="mt-2">
               <Authentication
