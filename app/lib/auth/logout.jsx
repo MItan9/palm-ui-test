@@ -15,7 +15,11 @@ export default function Logout() {
   }
 
   return (
-    <button type="submit" onClick={onClick}>
+    <button
+      type="submit"
+      onClick={onClick}
+      style={{ float: "right", margin: "10px" }} // This will place it on the left
+    >
       Logout
     </button>
   );
