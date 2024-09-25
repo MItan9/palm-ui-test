@@ -2,12 +2,13 @@
 
 import { useUserContext } from "@/app/user-context";
 import Link from "next/link";
+import { Box, Button, Typography, Container } from "@mui/material";
 
 export default function Home() {
   const user = useUserContext();
   const message = user.isAuthenticated
     ? `Hi ${user.name}, you are granted with ${rolesStr(user)}.`
-    : "You are not authenticated.";
+    : "Welcome to our platform. Please log in to continue.";
 
   function rolesStr(user) {
     if (!user?.roles?.length) {
@@ -17,17 +18,27 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="flex flex-col items-center justify-center bg-white p-8 rounded-lg shadow-lg">
-        {!user.isAuthenticated && (
-          <>
-            <p className="text-lg text-gray-700 mb-4">{message}</p>
-            <button className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600">
-              <Link href="/login">Login</Link>
-            </button>
-          </>
-        )}
-      </div>
-    </main>
+    <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {/* Main Content */}
+      <Container
+        maxWidth="md"
+        sx={{
+          flexGrow: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          textAlign: 'center',
+        }}
+      >
+        <Typography variant="h4" sx={{ marginBottom: 4 }}>
+          Welcome to the Banking Platform
+        </Typography>
+        <Typography variant="body1" sx={{ marginBottom: 6 }}>
+          {message}
+        </Typography>
+        
+      </Container>
+    </Box>
   );
 }
