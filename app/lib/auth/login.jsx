@@ -94,9 +94,10 @@ export default function Login({ onLogin }) {
 
   return (
     <span>
-      <form onSubmit={onSubmit}>
+      <form onSubmit={onSubmit} className="flex items-center space-x-4">
         {isIframeLoginPossible && (
           <select
+            className="px-2 py-1 border rounded-md"
             value={selectedLoginExperience}
             onChange={(e) => {
               setSelectedLoginExperience(
@@ -115,26 +116,35 @@ export default function Login({ onLogin }) {
             <option value={LoginExperience.DEFAULT}>default</option>
           </select>
         )}
-        <button disabled={user.isAuthenticated} type="submit">
+        <button
+          disabled={user.isAuthenticated}
+          type="submit"
+          className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 disabled:opacity-50"
+        >
           Login
         </button>
       </form>
       <div
         className={
           !user.isAuthenticated && isLoginModalDisplayed
-            ? "modal-overlay"
+            ? "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
             : "hidden"
         }
         onClick={() => setIsLoginModalDisplayed(false)}
       >
-        <div></div>
-        <div className="modal">
-          <div className="flex">
-            <span className="ml-auto">
-              <button onClick={() => setIsLoginModalDisplayed(false)}>X</button>
-            </span>
+        <div className="bg-white rounded-lg p-4 shadow-lg">
+          <div className="flex justify-end">
+            <button
+              className="text-gray-600 hover:text-gray-900"
+              onClick={() => setIsLoginModalDisplayed(false)}
+            >
+              X
+            </button>
           </div>
-          <iframe ref={iframeRef}></iframe>
+          <iframe
+            ref={iframeRef}
+            className="w-full h-96 border rounded-md"
+          ></iframe>
         </div>
       </div>
     </span>

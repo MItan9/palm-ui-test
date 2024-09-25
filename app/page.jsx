@@ -17,18 +17,16 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen">
-      <div className="flex">
-        <span className="ml-2"></span>
-        <button>
-          <Link href="/about">About</Link>
-        </button>
-        <span className="m-auto"></span>
-        <h1>Home</h1>
-        <span className="m-auto"></span>
-      </div>
-      <div className="flex flex-col items-center justify-between p-24">
-        <p>{message}</p>
+    <main className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="flex flex-col items-center justify-center bg-white p-8 rounded-lg shadow-lg">
+        {!user.isAuthenticated && (
+          <>
+            <p className="text-lg text-gray-700 mb-4">{message}</p>
+            <button className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600">
+              <Link href="/login">Login</Link>
+            </button>
+          </>
+        )}
       </div>
     </main>
   );
