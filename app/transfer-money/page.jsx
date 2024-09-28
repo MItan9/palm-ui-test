@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useUserContext } from "@/app/user-context"; // Import user context for authentication
 import { useRouter } from "next/navigation"; // Import useRouter from next/navigation
+import { ToastContainer, toast } from "react-toastify"; // Import react-toastify components
+import 'react-toastify/dist/ReactToastify.css'; // Import react-toastify CSS
 
 export default function TransferMoney() {
   const user = useUserContext();
@@ -10,7 +12,8 @@ export default function TransferMoney() {
 
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(""); // This will only hold the notification message
+  const [optionalMessage, setOptionalMessage] = useState(""); // New state for the Optional Message input
   const [selectedPreviousRecipient, setSelectedPreviousRecipient] = useState("");
 
   // List of previous recipients
@@ -22,12 +25,16 @@ export default function TransferMoney() {
     // Handle the transfer logic, e.g., calling an API
     if (user.isAuthenticated && amount > 0) {
       // Simulate transfer success
-      setMessage(`Successfully transferred $${amount} to ${recipient}`);
+  
+      toast.success(`Successfully transferred $${amount} to ${recipient}`); // Show success notification
+
+      // Reset form fields
       setRecipient("");
       setAmount("");
       setSelectedPreviousRecipient("");
+      setOptionalMessage(""); // Reset optional message as well
     } else {
-      setMessage("You must be logged in and the amount must be greater than zero to make a transfer.");
+      toast.error("You must be logged in and the amount must be greater than zero to make a transfer."); // Show error notification
     }
   };
 
@@ -101,12 +108,12 @@ export default function TransferMoney() {
 
         {/* Optional Message */}
         <div className="form-group flex flex-col">
-          <label htmlFor="message" className="mb-2 font-medium">Optional Message</label>
+          <label htmlFor="optionalMessage" className="mb-2 font-medium">Optional Message</label>
           <input
             type="text"
-            id="message"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            id="optionalMessage"
+            value={optionalMessage} // Controlled by optionalMessage state
+            onChange={(e) => setOptionalMessage(e.target.value)} // Updates optionalMessage state, not the message for transfer
             className="border border-gray-300 rounded p-2 w-full"
           />
         </div>
@@ -133,6 +140,9 @@ export default function TransferMoney() {
           Back to Dashboard
         </button>
       </div>
+
+      {/* Snackbar/Toast container */}
+      <ToastContainer />
     </div>
   );
 }
