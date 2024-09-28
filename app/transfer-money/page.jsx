@@ -1,5 +1,3 @@
-// app/transfer-money.jsx
-
 "use client";
 
 import { useState } from "react";
@@ -48,11 +46,13 @@ export default function TransferMoney() {
     }
   };
 
+  const isFormValid = recipient && amount > 0;
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6">
       <h1 className="text-3xl font-semibold mb-4">Transfer Money</h1>
 
-      <form onSubmit={handleSubmit} className="flex flex-col space-y-6">
+      <form onSubmit={handleSubmit} className="flex flex-col space-y-6 w-full max-w-lg">
         {/* Previous Recipient Dropdown */}
         <div className="form-group flex flex-col">
           <label htmlFor="previousRecipients" className="mb-2 font-medium">Select Previous Recipient</label>
@@ -60,7 +60,7 @@ export default function TransferMoney() {
             id="previousRecipients"
             value={selectedPreviousRecipient}
             onChange={handlePreviousRecipientChange}
-            className="border border-gray-300 rounded p-2"
+            className="border border-gray-300 rounded p-2 w-full"
           >
             <option value="">-- Select a Previous Recipient --</option>
             {previousRecipients.map((name, index) => (
@@ -80,7 +80,7 @@ export default function TransferMoney() {
             value={recipient}
             onChange={handleRecipientChange} // Clear dropdown when user types manually
             required
-            className="border border-gray-300 rounded p-2"
+            className="border border-gray-300 rounded p-2 w-full"
           />
         </div>
 
@@ -95,7 +95,7 @@ export default function TransferMoney() {
             required
             min="0.01"
             step="0.01"
-            className="border border-gray-300 rounded p-2"
+            className="border border-gray-300 rounded p-2 w-full"
           />
         </div>
 
@@ -107,15 +107,15 @@ export default function TransferMoney() {
             id="message"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            className="border border-gray-300 rounded p-2"
+            className="border border-gray-300 rounded p-2 w-full"
           />
         </div>
 
         {/* Submit Button */}
         <button
           type="submit"
-          className="bg-blue-500 text-white rounded p-2 hover:bg-blue-600"
-          disabled={!(recipient && amount > 0)}
+          className={`p-2 rounded ${isFormValid ? "bg-blue-500 text-white hover:bg-blue-600" : "bg-gray-400 text-gray-200"}`}
+          disabled={!isFormValid}
         >
           Send
         </button>
@@ -127,7 +127,8 @@ export default function TransferMoney() {
       <div className="mt-8">
         <button
           onClick={() => router.push("/dashboard")} // Correct router navigation
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+          className="px-4 py-2"
+          style={{ backgroundColor: "#17a2b8", color: "white", borderRadius: "0.375rem" }} // Applying the new color and styles
         >
           Back to Dashboard
         </button>

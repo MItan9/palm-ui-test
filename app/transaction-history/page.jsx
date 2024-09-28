@@ -1,5 +1,3 @@
-// app/transaction-history.jsx
-
 "use client"; // Ensuring it's a client-side component
 
 import { useState, useEffect } from "react";
@@ -34,21 +32,21 @@ export default function TransactionHistory() {
         <p className="text-red-500">You must be logged in to view transaction history.</p>
       ) : (
         <>
-          <div className="w-full max-w-4xl">
-            <table className="min-w-full border-collapse table-auto">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left p-4">Date</th>
-                  <th className="text-left p-4">Amount</th>
-                  <th className="text-left p-4">Recipient</th>
-                  <th className="text-left p-4">Status</th>
+          <div className="w-full max-w-4xl shadow-lg rounded-lg overflow-hidden bg-white">
+            <table className="min-w-full border-collapse table-auto bg-white">
+              <thead className="bg-blue-500 text-white">
+                <tr>
+                  <th className="text-left p-4 border-b-2 border-blue-700">Date</th>
+                  <th className="text-left p-4 border-b-2 border-blue-700">Amount</th>
+                  <th className="text-left p-4 border-b-2 border-blue-700">Recipient</th>
+                  <th className="text-left p-4 border-b-2 border-blue-700">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {transactions.map((transaction) => (
                   <tr
                     key={transaction.id}
-                    className={`border-b ${
+                    className={`border-b-2 ${
                       transaction.amount < 0 ? "text-red-500" : "text-green-500"
                     }`}
                   >
@@ -67,15 +65,15 @@ export default function TransactionHistory() {
           {/* Back to Dashboard button at the end of the page */}
           <div className="mt-8">
             <button
-              onClick={() => router.push("/dashboard")} // Correct router navigation
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+                onClick={() => router.push("/dashboard")} // Correct router navigation
+                className="px-4 py-2"
+                style={{ backgroundColor: "#17a2b8", color: "white", borderRadius: "0.375rem" }} // Applying the new color and styles
             >
-              Back to Dashboard
+                Back to Dashboard
             </button>
-          </div>
+            </div>
         </>
       )}
     </div>
   );
 }
-

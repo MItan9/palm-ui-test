@@ -61,7 +61,7 @@ export default function Profile() {
       ) : (
         <>
           {/* Personal Information Form */}
-          <form className="bg-white shadow-md rounded-lg p-8 w-full max-w-md mb-6" onSubmit={handleProfileSubmit}>
+          <form className="bg-white shadow-md rounded-lg p-8 w-full max-w-2xl mb-6" onSubmit={handleProfileSubmit}>
             <h3 className="text-2xl font-semibold mb-4">Personal Information</h3>
             <div className="mb-4">
               <label htmlFor="name" className="block mb-1">Name</label>
@@ -71,7 +71,7 @@ export default function Profile() {
                 name="name"
                 value={profileData.name}
                 onChange={handleProfileChange}
-                className="w-full border rounded-lg p-2"
+                className="w-full border border-gray-300 rounded-lg p-3" // Increased padding for better spacing
               />
             </div>
             <div className="mb-4">
@@ -82,7 +82,7 @@ export default function Profile() {
                 name="email"
                 value={profileData.email}
                 onChange={handleProfileChange}
-                className="w-full border rounded-lg p-2"
+                className="w-full border border-gray-300 rounded-lg p-3"
               />
             </div>
             <div className="mb-4">
@@ -93,14 +93,14 @@ export default function Profile() {
                 name="phone"
                 value={profileData.phone}
                 onChange={handleProfileChange}
-                className="w-full border rounded-lg p-2"
+                className="w-full border border-gray-300 rounded-lg p-3"
               />
             </div>
-            <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded-lg">Save Changes</button>
+            <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded-lg w-full">Save Changes</button>
           </form>
 
           {/* Password Change Form */}
-          <form className="bg-white shadow-md rounded-lg p-8 w-full max-w-md" onSubmit={handlePasswordSubmit}>
+          <form className="bg-white shadow-md rounded-lg p-8 w-full max-w-2xl" onSubmit={handlePasswordSubmit}>
             <h3 className="text-2xl font-semibold mb-4">Change Password</h3>
             <div className="mb-4">
               <label htmlFor="currentPassword" className="block mb-1">Current Password</label>
@@ -110,7 +110,7 @@ export default function Profile() {
                 name="currentPassword"
                 value={passwordData.currentPassword}
                 onChange={handlePasswordChange}
-                className="w-full border rounded-lg p-2"
+                className="w-full border border-gray-300 rounded-lg p-3"
               />
             </div>
             <div className="mb-4">
@@ -121,7 +121,7 @@ export default function Profile() {
                 name="newPassword"
                 value={passwordData.newPassword}
                 onChange={handlePasswordChange}
-                className="w-full border rounded-lg p-2"
+                className="w-full border border-gray-300 rounded-lg p-3"
               />
             </div>
             <div className="mb-4">
@@ -132,21 +132,22 @@ export default function Profile() {
                 name="confirmNewPassword"
                 value={passwordData.confirmNewPassword}
                 onChange={handlePasswordChange}
-                className="w-full border rounded-lg p-2"
+                className="w-full border border-gray-300 rounded-lg p-3"
               />
             </div>
-            <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded-lg">Change Password</button>
+            <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded-lg w-full">Change Password</button>
           </form>
 
           {/* Back to Dashboard button at the end of the page */}
           <div className="mt-8">
             <button
-              onClick={() => router.push("/dashboard")} // Correct router navigation
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+                onClick={() => router.push("/dashboard")} // Correct router navigation
+                className="px-4 py-2"
+                style={{ backgroundColor: "#17a2b8", color: "white", borderRadius: "0.375rem" }} // Applying the new color and styles
             >
-              Back to Dashboard
+                Back to Dashboard
             </button>
-          </div>
+            </div>
         </>
       )}
     </div>
