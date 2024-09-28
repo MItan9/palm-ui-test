@@ -113,10 +113,10 @@ export default function Login({ onLogin }) {
           display: 'flex',
           justifyContent: 'flex-end',
           alignItems: 'flex-start',
-          padding: 1, // Уменьшаем padding
-          gap: 1, // Уменьшаем gap между элементами
-          marginTop: 0.5, // Меньше отступ сверху
-          marginRight: 1, // Меньше отступ справа
+          padding: 1, 
+          gap: 1, 
+          marginTop: 0.5, 
+          marginRight: 1, 
         }}
       >
         {isIframeLoginPossible && (
@@ -144,11 +144,11 @@ export default function Login({ onLogin }) {
           sx={{
             backgroundColor: '#1565c0',
             color: 'white',
-            width: '150px', // Уменьшаем ширину
-            height: '40px', // Уменьшаем высоту
+            width: '150px', 
+            height: '40px', 
             opacity: 1,
             boxShadow: 'none',
-            marginLeft: '8px', // Отступ слева, чтобы кнопка была ближе к селектору
+            marginLeft: '8px',
           }}
         >
           Login

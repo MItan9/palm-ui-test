@@ -46,7 +46,7 @@ export default function RootLayout({ children }) {
             </nav>
 
             <div className="flex-1 p-6 bg-transparent"> {/* Set background to transparent */}
-              <h1 className="mt-2">React UI</h1>
+              {/* <h1 className="mt-2">React UI</h1> */}
               <div className="mt-4">
                 <Authentication
                   onLogin={() => userService.refresh(user, setUser)}
