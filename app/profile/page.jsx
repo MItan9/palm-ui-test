@@ -1,10 +1,12 @@
 "use client";
 
 import { useUserContext } from "@/app/user-context";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation"; // Import useRouter from next/navigation for Next.js 13+ apps
+import { useState } from "react";
 
 export default function Profile() {
   const user = useUserContext();
+  const router = useRouter(); // Using router from next/navigation for navigation
 
   // State for personal information form
   const [profileData, setProfileData] = useState({
@@ -135,6 +137,16 @@ export default function Profile() {
             </div>
             <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded-lg">Change Password</button>
           </form>
+
+          {/* Back to Dashboard button at the end of the page */}
+          <div className="mt-8">
+            <button
+              onClick={() => router.push("/dashboard")} // Correct router navigation
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+            >
+              Back to Dashboard
+            </button>
+          </div>
         </>
       )}
     </div>

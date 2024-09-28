@@ -1,9 +1,10 @@
 // app/transaction-history.jsx
 
-"use client";
+"use client"; // Ensuring it's a client-side component
 
 import { useState, useEffect } from "react";
 import { useUserContext } from "@/app/user-context"; // Import user context for authentication
+import { useRouter } from "next/navigation"; // Import useRouter from next/navigation (for app directory)
 
 // Mock transaction data for demo purposes
 const mockTransactions = [
@@ -16,6 +17,7 @@ const mockTransactions = [
 export default function TransactionHistory() {
   const user = useUserContext();
   const [transactions, setTransactions] = useState([]);
+  const router = useRouter(); // Using router from next/navigation for Next.js 13+ apps
 
   useEffect(() => {
     if (user.isAuthenticated) {
@@ -31,36 +33,49 @@ export default function TransactionHistory() {
       {!user.isAuthenticated ? (
         <p className="text-red-500">You must be logged in to view transaction history.</p>
       ) : (
-        <div className="w-full max-w-4xl">
-          <table className="min-w-full border-collapse table-auto">
-            <thead>
-              <tr className="border-b">
-                <th className="text-left p-4">Date</th>
-                <th className="text-left p-4">Amount</th>
-                <th className="text-left p-4">Recipient</th>
-                <th className="text-left p-4">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {transactions.map((transaction) => (
-                <tr
-                  key={transaction.id}
-                  className={`border-b ${
-                    transaction.amount < 0 ? "text-red-500" : "text-green-500"
-                  }`}
-                >
-                  <td className="p-4">{transaction.date}</td>
-                  <td className="p-4">
-                    {transaction.amount < 0 ? `-$${Math.abs(transaction.amount)}` : `+$${transaction.amount}`}
-                  </td>
-                  <td className="p-4">{transaction.recipient}</td>
-                  <td className="p-4">{transaction.status}</td>
+        <>
+          <div className="w-full max-w-4xl">
+            <table className="min-w-full border-collapse table-auto">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left p-4">Date</th>
+                  <th className="text-left p-4">Amount</th>
+                  <th className="text-left p-4">Recipient</th>
+                  <th className="text-left p-4">Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {transactions.map((transaction) => (
+                  <tr
+                    key={transaction.id}
+                    className={`border-b ${
+                      transaction.amount < 0 ? "text-red-500" : "text-green-500"
+                    }`}
+                  >
+                    <td className="p-4">{transaction.date}</td>
+                    <td className="p-4">
+                      {transaction.amount < 0 ? `-$${Math.abs(transaction.amount)}` : `+$${transaction.amount}`}
+                    </td>
+                    <td className="p-4">{transaction.recipient}</td>
+                    <td className="p-4">{transaction.status}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Back to Dashboard button at the end of the page */}
+          <div className="mt-8">
+            <button
+              onClick={() => router.push("/dashboard")} // Correct router navigation
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+            >
+              Back to Dashboard
+            </button>
+          </div>
+        </>
       )}
     </div>
   );
 }
+
