@@ -15,7 +15,12 @@ export default function Logout() {
   }
 
   return (
-    <button type="submit" onClick={onClick}>
+    <button
+      type="submit"
+      onClick={onClick}
+      className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+      style={{ float: "right", margin: "10px" }} // Keep it floating on the right
+    >
       Logout
     </button>
   );
