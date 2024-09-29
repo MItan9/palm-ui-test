@@ -65,7 +65,7 @@ export default function TransactionHistory() {
           {/* Back to Dashboard button at the end of the page */}
           <div className="mt-8">
             <button
-                onClick={() => router.push("/dashboard")} // Correct router navigation
+               onClick={() => router.push('/')}// Correct router navigation
                 className="px-4 py-2"
                 style={{ backgroundColor: "#17a2b8", color: "white", borderRadius: "0.375rem" }} // Applying the new color and styles
             >
