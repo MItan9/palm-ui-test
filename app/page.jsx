@@ -1,14 +1,14 @@
-// app/dashboard.jsx
-
 "use client";
 
-import Link from "next/link";
+import React, { useState, useEffect } from "react";
+import { Box, Container, Typography, Paper, Button, TextField, List, ListItem, ListItemText } from "@mui/material";
+import CircularProgress from '@mui/material/CircularProgress';
+import QrCodeScannerOutlinedIcon from '@mui/icons-material/QrCodeScannerOutlined';
 import { useUserContext } from "@/app/user-context";
-import { useState, useEffect } from "react";
-import { Box, Container, Typography, Paper, List, ListItem, ListItemText, CircularProgress } from "@mui/material";
+import Link from "next/link"; // Import Link for navigation
 import axios from "axios";
 
-// Функция для извлечения CSRF-токена из куков
+// Function to get CSRF token from cookies
 const getCsrfToken = () => {
   const cookieName = 'XSRF-TOKEN=';
   const cookies = document.cookie.split(';');
@@ -27,50 +27,86 @@ export default function Dashboard() {
   const [balance, setBalance] = useState("N/A");
   const [mfaStatus, setMfaStatus] = useState(null);
   const [qrCode, setQrCode] = useState(null);
-  const [loading, setLoading] = useState(false); // для индикации загрузки
-  const [statusMessage, setStatusMessage] = useState(null); // для сообщений об ошибках/статусах
+  const [mfaSecret, setMfaSecret] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [statusMessage, setStatusMessage] = useState(null);
+  const [authCode, setAuthCode] = useState(""); // Поле для хранения кода, который введет пользователь
+  const [submitedCodeStatus, setSubmitedCodeStatus] = useState("");
 
   useEffect(() => {
     if (user.isAuthenticated) {
-      // Заменить на API вызов для получения баланса
-      setBalance("$10,000"); // Мок-данные баланса для демонстрации
-
-      handleLinkTotp(); // Запускаем запрос для проверки MFA и получения QR-кода
+      setBalance("$10,000"); // Mock balance data for demonstration
+      handleLinkTotp();
     }
   }, [user]);
 
   const handleLinkTotp = async () => {
     setLoading(true);
     setStatusMessage(null);
-
+  
     try {
-      // Получаем CSRF-токен из куки
       const csrfToken = getCsrfToken();
+      if (!csrfToken) {
+        setStatusMessage("CSRF token not found.");
+        setLoading(false);
+        return;
+      }
+  
+      const response = await axios.get("auth/oauth2/generate-qr-code", {
+        headers: {
+          "Content-Type": "application/json",
+          "X-XSRF-TOKEN": csrfToken,
+        },
+        withCredentials: true,
+      });
+  
+      if (response.status === 200) {
+        setMfaStatus(200);
+        setQrCode(response.data.qrCode);
+        setMfaSecret(response.data.mfaSecret);
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 404 && error.response.data.error === "E016") {
+        setMfaStatus(404); // MFA already enabled
+      } else {
+        setStatusMessage("Error occurred while linking TOTP token and generating QR code.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // Function to send the code entered by the user to the server
+  const handleSubmitCode = async () => {
+    setLoading(true);
+    setStatusMessage(null);
+    try {
+      const csrfToken = getCsrfToken();
       if (!csrfToken) {
         setStatusMessage("CSRF token not found.");
         setLoading(false);
         return;
       }
 
-      // Запрос на получение статуса MFA и QR-кода с передачей CSRF-токена
-      const response = await axios.post("/auth/oauth2/generate-qr-code", null, {
-        headers: {
-          'X-CSRF-Token': csrfToken, // Передаем CSRF-токен в заголовках
-        },
-        withCredentials: true, // Для передачи cookies с запросом
-      });
-
+      const response = await axios.post(
+        "/bff/auth/link-totp",
+        { code: authCode },  // Here we pass the authCode entered by the user
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "X-XSRF-TOKEN": csrfToken,
+          },
+          withCredentials: true,
+        }
+      );
+      setSubmitedCodeStatus(response.status);
       if (response.status === 200) {
-        setMfaStatus(200);
-        setQrCode(response.data.qrCode);
+        setStatusMessage("MFA successfully linked!");
+      } else {
+        setStatusMessage("Failed to link MFA. Please try again.");
       }
     } catch (error) {
-      if (error.response && error.response.status === 404 && error.response.data.error === "E016") {
-        setMfaStatus(404); // MFA уже включен
-      } else {
-        setStatusMessage("Error occurred while generating QR code.");
-      }
+      setStatusMessage("Error occurred while linking MFA: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -101,7 +137,6 @@ export default function Dashboard() {
     );
   }
 
-  // Показать статус загрузки или сообщение об ошибке
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
@@ -110,100 +145,107 @@ export default function Dashboard() {
     );
   }
 
-  // if (statusMessage) {
-  //   return (
-  //     <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
-  //       <Typography variant="h6" color="error">
-  //         {statusMessage}
-  //       </Typography>
-  //     </Box>
-  //   );
-  // }
-
-  // Если MFA не включен и мы получили QR-код, показываем страницу с QR-кодом
-  // if (mfaStatus === 200) {
-  //   return (
-  //     <Box sx={{ display: "flex", minHeight: "100vh", alignItems: "center", justifyContent: "center" }}>
-  //       <Paper
-  //         elevation={3}
-  //         sx={{
-  //           padding: 4,
-  //           maxWidth: 400,
-  //           backgroundColor: "white",
-  //           borderRadius: 3,
-  //           boxShadow: "0px 3px 6px rgba(0, 0, 0, 0.16)",
-  //         }}
-  //       >
-  //         <Typography variant="h6" sx={{ marginBottom: 2, fontWeight: "bold" }}>
-  //           Set up MFA
-  //         </Typography>
-  //         <Typography variant="body1" sx={{ marginBottom: 2 }}>
-  //           Scan the QR code below to enable MFA for your account.
-  //         </Typography>
-  //         <img src={qrCode} alt="QR Code for MFA setup" style={{ maxWidth: "100%" }} />
-  //       </Paper>
-  //     </Box>
-  //   );
-  // }
-
-  // Если MFA уже включен, показываем текущий Dashboard
-  return (
-    <Box sx={{ minHeight: "100vh", display: "flex" }}>
-      <Box sx={{ display: "flex", width: "100%" }}>
-        {/* Sidebar */}
-        <Box
-          sx={{
-            width: 256,
-            backgroundColor: "#121a2a", 
-            color: "white",
-            padding: 3,
-            display: "flex",
-            flexDirection: "column",
-            height: "100vh",
-          }}
-        >
-          <Typography variant="h5" sx={{ marginBottom: 4, fontWeight: "bold" }}>
-            Menu
-          </Typography>
-          <List>
-            <ListItem button component={Link} href="/transaction-history" sx={{ color: "white", '&:hover': { color: "gray.300" } }}>
-              <ListItemText primary="Transaction History" />
-            </ListItem>
-            <ListItem button component={Link} href="/transfer-money" sx={{ color: "white", '&:hover': { color: "gray.300" } }}>
-              <ListItemText primary="Transfer Money" />
-            </ListItem>
-            <ListItem button component={Link} href="/profile" sx={{ color: "white", '&:hover': { color: "gray.300" } }}>
-              <ListItemText primary="Profile" />
-            </ListItem>
-          </List>
-        </Box>
-
-        {/* Main content */}
-        <Box sx={{ flex: 1, padding: 4, position: "relative" }}>
-          <Typography variant="h3" sx={{ marginBottom: 4, fontWeight: "bold" }}>
-            Dashboard
-          </Typography>
-
-          {/* Balance Card */}
-          <Paper
-            elevation={3}
+  if (mfaStatus === 404 || submitedCodeStatus === 200) {
+    return (
+      <Box sx={{ minHeight: "100vh", display: "flex" }}>
+        <Box sx={{ display: "flex", width: "100%" }}>
+          {/* Sidebar */}
+          <Box
             sx={{
-              padding: 4,
-              maxWidth: 400,
-              backgroundColor: "white",
-              borderRadius: 3,
-              boxShadow: "0px 3px 6px rgba(0, 0, 0, 0.16)",
+              width: 256,
+              backgroundColor: "#121a2a", 
+              color: "white",
+              padding: 3,
+              display: "flex",
+              flexDirection: "column",
+              height: "100vh",
             }}
           >
-            <Typography variant="h6" sx={{ marginBottom: 2, fontWeight: "bold" }}>
-              Balance
+            <Typography variant="h5" sx={{ marginBottom: 4, fontWeight: "bold" }}>
+              Menu
             </Typography>
-            <Typography variant="h4" sx={{ color: "green", fontWeight: "bold" }}>
-              {balance}
+            <List>
+              <ListItem button component={Link} href="/transaction-history" sx={{ color: "white", '&:hover': { color: "gray.300" } }}>
+                <ListItemText primary="Transaction History" />
+              </ListItem>
+              <ListItem button component={Link} href="/transfer-money" sx={{ color: "white", '&:hover': { color: "gray.300" } }}>
+                <ListItemText primary="Transfer Money" />
+              </ListItem>
+              <ListItem button component={Link} href="/profile" sx={{ color: "white", '&:hover': { color: "gray.300" } }}>
+                <ListItemText primary="Profile" />
+              </ListItem>
+            </List>
+          </Box>
+
+          {/* Main content */}
+          <Box sx={{ flex: 1, padding: 4, position: "relative" }}>
+            <Typography variant="h3" sx={{ marginBottom: 4, fontWeight: "bold" }}>
+              Dashboard
             </Typography>
-          </Paper>
+
+            {/* Balance Card */}
+            <Paper
+              elevation={3}
+              sx={{
+                padding: 4,
+                maxWidth: 400,
+                backgroundColor: "white",
+                borderRadius: 3,
+                boxShadow: "0px 3px 6px rgba(0, 0, 0, 0.16)",
+              }}
+            >
+              <Typography variant="h6" sx={{ marginBottom: 2, fontWeight: "bold" }}>
+                Balance
+              </Typography>
+              <Typography variant="h4" sx={{ color: "green", fontWeight: "bold" }}>
+                {balance}
+              </Typography>
+            </Paper>
+          </Box>
         </Box>
       </Box>
-    </Box>
-  );
+    );
+  }
+
+  if (mfaStatus === 200) {
+    return (
+      <Box sx={{ display: "flex", minHeight: "100vh", alignItems: "center", justifyContent: "center" }}>
+        <Paper elevation={3} sx={{ padding: 4, maxWidth: 400 }}>
+          <Typography variant="h6" sx={{ marginBottom: 2, fontWeight: "bold" }}>
+            Set up MFA using Authenticator app
+          </Typography>
+          <Typography variant="body1" sx={{ marginBottom: 2 }}>
+          Open your authenticator app, choose Show QR code on
+this page, then use the app to scan the code.
+Alternatively, you can type a secret key.
+(Show secret key)
+          </Typography>
+          <img src={qrCode} alt="QR Code for MFA setup" style={{ maxWidth: "100%" }} />
+          <TextField
+            label="Enter code from Authenticator app"
+            fullWidth
+            value={authCode}
+            onChange={(e) => setAuthCode(e.target.value)}
+            sx={{ marginTop: 2 }}
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            fullWidth
+            onClick={handleSubmitCode}  // Call the handleSubmitCode function on button click
+            sx={{ marginTop: 3 }}
+          >
+            Submit Code
+          </Button>
+          {statusMessage && (
+            <Typography variant="body2" color="error" sx={{ marginTop: 2 }}>
+              {statusMessage}
+            </Typography>
+          )}
+        </Paper>
+      </Box>
+    );
+  }
+
+  return null;
 }
