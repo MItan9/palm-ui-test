@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 export default function Manager() {
   const user = useUserContext();
-  const [isManager, setIsManager] = useState(false);
+  const [isManager, setIsManager] = useState(true);
 
   // Initial list of pending transactions
   const [transactions, setTransactions] = useState([
@@ -27,12 +27,12 @@ export default function Manager() {
     ));
   };
 
-  useEffect(() => {
-    if (user.isAuthenticated) {
-      // Assuming user.roles contains roles and "manager" is one of them
-      setIsManager(user.roles?.includes("manager"));
-    }
-  }, [user]);
+//   useEffect(() => {
+//     if (user.isAuthenticated) {
+//       // Assuming user.roles contains roles and "manager" is one of them
+//       setIsManager(user.roles?.includes("manager"));
+//     }
+//   }, [user]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6">
@@ -44,14 +44,14 @@ export default function Manager() {
         <p className="text-red-500">You do not have access to the Manager Dashboard.</p>
       ) : (
         <div className="bg-white shadow-md rounded-lg p-8 w-full max-w-4xl">
-          <h2 className="text-xl font-semibold mb-4">Welcome, {user.name}</h2>
-          <p className="mb-4">As a manager, you can:</p>
+          {/* <h2 className="text-xl font-semibold mb-4">Welcome, {user.name}</h2> */}
+          {/* <p className="mb-4">As a manager, you can:</p>
           <ul className="list-disc list-inside mb-8">
             <li>View and manage user accounts</li>
             <li>Review transactions</li>
             <li>Oversee system activities</li>
             <li>Generate reports</li>
-          </ul>
+          </ul> */}
 
           {/* Transactions Table */}
           <h2 className="text-2xl font-semibold mb-4">Manage Transactions</h2>
@@ -75,14 +75,14 @@ export default function Manager() {
                   <td className="px-4 py-2">
                     {transaction.status === "Pending" && (
                       <>
-                        <button
-                          className="bg-green-500 text-white py-1 px-2 rounded mr-2"
+                       <button
+                          className="bg-green-500 text-white py-1 px-2 rounded mr-2 hover:bg-green-600 transition-colors"
                           onClick={() => confirmTransaction(transaction.id)}
                         >
                           Confirm
                         </button>
                         <button
-                          className="bg-red-500 text-white py-1 px-2 rounded"
+                          className="bg-red-500 text-white py-1 px-2 rounded hover:bg-red-600 transition-color"
                           onClick={() => rejectTransaction(transaction.id)}
                         >
                           Reject

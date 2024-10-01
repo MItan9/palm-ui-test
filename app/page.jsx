@@ -30,8 +30,9 @@ export default function Dashboard() {
   const [mfaSecret, setMfaSecret] = useState(null);
   const [loading, setLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState(null);
-  const [authCode, setAuthCode] = useState(""); // Поле для хранения кода, который введет пользователь
+  const [authCode, setAuthCode] = useState(""); // Field to store the code entered by the user
   const [submitedCodeStatus, setSubmitedCodeStatus] = useState("");
+  const [showSecretKey, setShowSecretKey] = useState(false); // New state to track secret key visibility
 
   useEffect(() => {
     if (user.isAuthenticated) {
@@ -215,11 +216,24 @@ export default function Dashboard() {
             Set up MFA using Authenticator app
           </Typography>
           <Typography variant="body1" sx={{ marginBottom: 2 }}>
-          Open your authenticator app, choose Show QR code on
-this page, then use the app to scan the code.
-Alternatively, you can type a secret key.
-(Show secret key)
+            Open your authenticator app, choose Show QR code on
+            this page, then use the app to scan the code. 
+            Alternatively, you can type a secret key.
+            <span 
+              style={{ color: '#3b82f6', cursor: 'pointer' }} 
+              onClick={() => setShowSecretKey(!showSecretKey)}
+            >
+              {showSecretKey ? " (Hide secret key)" : " (Show secret key)"}
+            </span>
           </Typography>
+
+          {/* Conditionally show the MFA secret key */}
+          {showSecretKey && (
+            <Typography variant="body2" sx={{ marginBottom: 2 }}>
+              MFA Secret Key: {mfaSecret}
+            </Typography>
+          )}
+
           <img src={qrCode} alt="QR Code for MFA setup" style={{ maxWidth: "100%" }} />
           <TextField
             label="Enter code from Authenticator app"
@@ -230,13 +244,20 @@ Alternatively, you can type a secret key.
           />
           <Button
             variant="contained"
-            color="primary"
             fullWidth
-            onClick={handleSubmitCode}  // Call the handleSubmitCode function on button click
-            sx={{ marginTop: 3 }}
+            onClick={handleSubmitCode}
+            sx={{
+              marginTop: 3,
+              backgroundColor: '#3b82f6 !important',  // Force the background to blue
+              color: '#ffffff !important',            // Force the text color to white
+              '&:hover': {
+                backgroundColor: '#1d4ed8 !important',  // Darker blue on hover
+              },
+            }}
           >
             Submit Code
           </Button>
+
           {statusMessage && (
             <Typography variant="body2" color="error" sx={{ marginTop: 2 }}>
               {statusMessage}

@@ -96,7 +96,7 @@ export default function Profile() {
                 className="w-full border border-gray-300 rounded-lg p-3"
               />
             </div>
-            <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded-lg w-full">Save Changes</button>
+            <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-700 w-full">Save Changes</button>
           </form>
 
           {/* Password Change Form */}
@@ -135,19 +135,18 @@ export default function Profile() {
                 className="w-full border border-gray-300 rounded-lg p-3"
               />
             </div>
-            <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded-lg w-full">Change Password</button>
+            <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-700 w-full">Change Password</button>
           </form>
 
           {/* Back to Dashboard button at the end of the page */}
           <div className="mt-8">
             <button
-                onClick={() => router.push('/')} // Correct router navigation
-                className="px-4 py-2"
-                style={{ backgroundColor: "#17a2b8", color: "white", borderRadius: "0.375rem" }} // Applying the new color and styles
+              onClick={() => router.push('/')} // Correct router navigation
+              className="px-4 py-2 bg-teal-500 text-white rounded-md hover:bg-teal-600 transition-colors"
             >
-                Back to Dashboard
+              Back to Dashboard
             </button>
-            </div>
+          </div>
         </>
       )}
     </div>
