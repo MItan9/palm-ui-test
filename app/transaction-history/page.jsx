@@ -1,78 +1,123 @@
-"use client"; // Ensuring it's a client-side component
+"use client"; 
 
 import { useState, useEffect } from "react";
-import { useUserContext } from "@/app/user-context"; // Import user context for authentication
-import { useRouter } from "next/navigation"; // Import useRouter from next/navigation (for app directory)
-
-// Mock transaction data for demo purposes
-const mockTransactions = [
-  { id: 1, date: "2024-09-01", amount: 200, recipient: "John Doe", status: "Completed" },
-  { id: 2, date: "2024-09-02", amount: -100, recipient: "Jane Smith", status: "Rejected" },
-  { id: 3, date: "2024-09-05", amount: 150, recipient: "Company ABC", status: "In Progress" },
-  { id: 4, date: "2024-09-10", amount: -50, recipient: "Shop XYZ", status: "Pending" },
-];
+import { useUserContext } from "@/app/user-context"; 
+import { useRouter } from "next/navigation"; 
+import axios from "axios"; 
 
 export default function TransactionHistory() {
   const user = useUserContext();
   const [transactions, setTransactions] = useState([]);
-  const router = useRouter(); // Using router from next/navigation for Next.js 13+ apps
+  const [loading, setLoading] = useState(true); 
+  const [accountNum, setAccountNum] = useState(""); 
+  const router = useRouter(); 
+  const [name, setName] = useState(""); 
+
+  async function fetchUserData() {
+    const axiosInstance = axios.create({ baseURL: '/bff/api' });
+    try {
+      const userResponse = await axiosInstance.get("/me");
+      const username = userResponse.data.username;
+      
+      setName(username)
+      fetchAccountNumber(username); 
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  }
+
+  async function fetchAccountNumber(username) {
+
+    const axiosInstance = axios.create({ baseURL: '/bff/api' });
+    try {
+      const accountResponse = await axiosInstance.get(`/api/accounts/${username}`);
+      console.log('data',accountResponse.data)
+      console.log('ACCOUNTNUMBER',accountResponse.data.accountNum);
+      setAccountNum(accountResponse.data.accountNum); 
+    } catch (error) {
+      console.error("Error fetching account number:", error);
+    }
+  }
+
+  async function fetchTransactionData() {
+
+    const axiosInstance = axios.create({ baseURL: '/bff/api' });
+    try {
+      const accountResponse = await axiosInstance.get(`/api/transactions/getTransactions`,
+        { params: { accountNum } }
+      );
+      setTransactions(accountResponse.data); 
+    } catch (error) {
+      console.error("Error fetching transaction data:", error);
+      setTransactions([]); 
+    } finally {
+      setLoading(false); 
+    }
+  }
 
   useEffect(() => {
-    if (user.isAuthenticated) {
-      // Replace this with an API call to get the user's transaction history
-      setTransactions(mockTransactions);
-    }
-  }, [user]);
+    fetchUserData();
+    fetchAccountNumber(name)
+  }, []);
 
+  useEffect(() => {
+    if (accountNum && user.isAuthenticated) {
+      fetchTransactionData();
+    }
+  }, [accountNum, user]);
+
+ 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6">
       <h1 className="text-3xl font-semibold mb-4">Transaction History</h1>
-
-      {!user.isAuthenticated ? (
-        <p className="text-red-500">You must be logged in to view transaction history.</p>
+      {loading ? (
+        <p>Loading transaction history...</p>
+      ) : transactions.length === 0 ? (
+        <p>No transactions found.</p>
       ) : (
-        <>
-          <div className="w-full max-w-4xl shadow-lg rounded-lg overflow-hidden bg-white">
-            <table className="min-w-full border-collapse table-auto bg-white">
-              <thead className="bg-blue-500 text-white">
-                <tr>
-                  <th className="text-left p-4 border-b-2 border-blue-700">Date</th>
-                  <th className="text-left p-4 border-b-2 border-blue-700">Amount</th>
-                  <th className="text-left p-4 border-b-2 border-blue-700">Recipient</th>
-                  <th className="text-left p-4 border-b-2 border-blue-700">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {transactions.map((transaction) => (
-                  <tr
-                    key={transaction.id}
-                    className={`border-b-2 ${
-                      transaction.amount < 0 ? "text-red-500" : "text-green-500"
-                    }`}
-                  >
-                    <td className="p-4">{transaction.date}</td>
-                    <td className="p-4">
-                      {transaction.amount < 0 ? `-$${Math.abs(transaction.amount)}` : `+$${transaction.amount}`}
-                    </td>
-                    <td className="p-4">{transaction.recipient}</td>
-                    <td className="p-4">{transaction.status}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Back to Dashboard button at the end of the page */}
-          <div className="mt-8">
-            <button
-              onClick={() => router.push('/')} // Correct router navigation
-              className="px-4 py-2 bg-teal-500 text-white rounded-md hover:bg-teal-600 transition-colors"
-            >
-              Back to Dashboard
-            </button>
-          </div>
-        </>
+        <table className="min-w-full leading-normal">
+          <thead>
+            <tr>
+              <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</th>
+              <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Amount</th>
+              <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Sender</th>
+              <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Recipient</th>
+              <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Message</th>
+              <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {transactions.map((transaction) => (
+              <tr key={transaction.transactionId}>
+                <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                  {new Date(transaction.createdAt).toLocaleDateString()}
+                </td>
+                <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                  {transaction.amount} {transaction.currency}
+                </td>
+                <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                  {transaction.sourceAccount.username} ({transaction.sourceAccount.accountNum})
+                </td>
+                <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                  {transaction.targetAccount.username} ({transaction.targetAccount.accountNum})
+                </td>
+                <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                  {transaction.message}
+                </td>
+                <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                  {transaction.status.replace("_", " ")}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
+      <button
+        onClick={() => router.push('/')}
+        className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+      >
+        Back to Dashboard
+      </button>
     </div>
   );
 }

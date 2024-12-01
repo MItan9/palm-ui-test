@@ -1,97 +1,122 @@
 "use client";
 
-import { useState } from "react";
-import { useUserContext } from "@/app/user-context"; // Import user context for authentication
-import { useRouter } from "next/navigation"; // Import useRouter from next/navigation
-import { ToastContainer, toast } from "react-toastify"; // Import react-toastify components
-import 'react-toastify/dist/ReactToastify.css'; // Import react-toastify CSS
+import { useState, useEffect } from "react";
+import { useUserContext } from "@/app/user-context"; 
+import { useRouter } from "next/navigation"; 
+import { ToastContainer, toast } from "react-toastify"; 
+import 'react-toastify/dist/ReactToastify.css';
+import axios from "axios"; 
 
 export default function TransferMoney() {
   const user = useUserContext();
-  const router = useRouter(); // Using router from next/navigation for Next.js 13+ apps
+  const router = useRouter();
 
-  const [recipient, setRecipient] = useState("");
+  const [senderUsername, setSenderUsername] = useState(""); 
+  const [receiverUsername, setReceiverUsername] = useState(""); 
+  const [receiverId, setReceiverId] = useState(""); 
+  const [senderId, setSenderId] = useState(""); 
   const [amount, setAmount] = useState("");
-  const [message, setMessage] = useState(""); // This will only hold the notification message
-  const [optionalMessage, setOptionalMessage] = useState(""); // New state for the Optional Message input
-  const [selectedPreviousRecipient, setSelectedPreviousRecipient] = useState("");
+  const [comment, setComment] = useState("");
 
-  // List of previous recipients
-  const previousRecipients = ["John Doe", "Jane Smith", "Company ABC"];
+  useEffect(() => {
+    if (senderUsername) {
+      fetchAccountId(senderUsername, true); 
+    }
+    if (receiverUsername) {
+      fetchAccountId(receiverUsername, false);
+    }
+  }, [senderUsername, receiverUsername]);
 
-  const handleSubmit = (event) => {
+  async function fetchAccountId(username, isSender) {
+    const axiosInstance = axios.create({ baseURL: '/bff/api' });
+    try {
+      const accountResponse = await axiosInstance.get(`/api/accounts/${username}`);
+      const accountId = accountResponse.data.id;
+      console.log(`${isSender ? 'Sender' : 'Receiver'} ID:`, accountId);
+      if (isSender) {
+        setSenderId(accountId);
+      } else {
+        setReceiverId(accountId);
+      }
+    } catch (error) {
+      console.error(`Error fetching ${isSender ? 'sender' : 'receiver'} account number:`, error);
+    }
+  }
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
+    if (user.isAuthenticated && parseFloat(amount) > 0) {
+      const postData = {
+        senderAccountId: senderId, 
+        receiverAccountId: receiverId,
+        amount: parseFloat(amount),
+        createdBy: senderUsername,
+        description: comment
+      };
 
-    // Handle the transfer logic, e.g., calling an API
-    if (user.isAuthenticated && amount > 0) {
-      // Simulate transfer success
-  
-      toast.success(`Successfully transferred $${amount} to ${recipient}`); // Show success notification
-
-      // Reset form fields
-      setRecipient("");
-      setAmount("");
-      setSelectedPreviousRecipient("");
-      setOptionalMessage(""); // Reset optional message as well
+      try {
+        const axiosInstance = axios.create({ baseURL: '/bff/api' });
+        const response = await axiosInstance.post('/api/transactions/create', postData);
+        console.log('Success:', response.data);
+        toast.success(`Successfully transferred $${amount} to ${receiverUsername}`);
+        resetForm();
+      } catch (error) {
+        console.error('Error:', error);
+        toast.error("Failed to make a transfer.");
+      }
     } else {
-      toast.error("You must be logged in and the amount must be greater than zero to make a transfer."); // Show error notification
+      toast.error("You must be logged in and the amount must be greater than zero to make a transfer.");
     }
   };
 
-  // Auto-fill recipient when selecting from the dropdown
-  const handlePreviousRecipientChange = (e) => {
-    const selectedRecipient = e.target.value;
-    setSelectedPreviousRecipient(selectedRecipient);
-    setRecipient(selectedRecipient);
+  const handleSenderChange = (e) => {
+    setSenderUsername(e.target.value);
+    fetchAccountId(e.target.value, true); 
   };
 
-  // Clear dropdown selection if user types manually
   const handleRecipientChange = (e) => {
-    setRecipient(e.target.value);
-    if (selectedPreviousRecipient) {
-      setSelectedPreviousRecipient(""); // Clear dropdown when manual input happens
-    }
+    setReceiverUsername(e.target.value);
+    fetchAccountId(e.target.value, false); 
   };
 
-  const isFormValid = recipient && amount > 0;
+  const resetForm = () => {
+    setSenderUsername("");
+    setReceiverUsername("");
+    setAmount("");
+    setComment("");
+  };
+
+  const isFormValid = senderId && receiverId && parseFloat(amount) > 0;
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6">
       <h1 className="text-3xl font-semibold mb-4">Transfer Money</h1>
 
       <form onSubmit={handleSubmit} className="flex flex-col space-y-6 w-full max-w-lg">
-        {/* Previous Recipient Dropdown */}
         <div className="form-group flex flex-col">
-          <label htmlFor="previousRecipients" className="mb-2 font-medium">Select Previous Recipient</label>
-          <select
-            id="previousRecipients"
-            value={selectedPreviousRecipient}
-            onChange={handlePreviousRecipientChange}
-            className="border border-gray-300 rounded p-2 w-full"
-          >
-            <option value="">-- Select a Previous Recipient --</option>
-            {previousRecipients.map((name, index) => (
-              <option key={index} value={name}>
-                {name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Recipient Name/Account Number */}
-        <div className="form-group flex flex-col">
-          <label htmlFor="recipient" className="mb-2 font-medium">Recipient’s Name/Account Number</label>
+          <label htmlFor="senderUsername" className="mb-2 font-medium">Your Username</label>
           <input
             type="text"
-            id="recipient"
-            value={recipient}
-            onChange={handleRecipientChange} // Clear dropdown when user types manually
+            id="senderUsername"
+            value={senderUsername}
+            onChange={handleSenderChange}
             required
             className="border border-gray-300 rounded p-2 w-full"
           />
         </div>
 
-        {/* Amount */}
+        <div className="form-group flex flex-col">
+          <label htmlFor="receiverUsername" className="mb-2 font-medium">Recipient's Username</label>
+          <input
+            type="text"
+            id="receiverUsername"
+            value={receiverUsername}
+            onChange={handleRecipientChange}
+            required
+            className="border border-gray-300 rounded p-2 w-full"
+          />
+        </div>
+
         <div className="form-group flex flex-col">
           <label htmlFor="amount" className="mb-2 font-medium">Amount</label>
           <input
@@ -106,19 +131,17 @@ export default function TransferMoney() {
           />
         </div>
 
-        {/* Optional Message */}
         <div className="form-group flex flex-col">
-          <label htmlFor="optionalMessage" className="mb-2 font-medium">Optional Message</label>
+          <label htmlFor="comment" className="mb-2 font-medium">Comment (Optional)</label>
           <input
             type="text"
-            id="optionalMessage"
-            value={optionalMessage} // Controlled by optionalMessage state
-            onChange={(e) => setOptionalMessage(e.target.value)} // Updates optionalMessage state, not the message for transfer
+            id="comment"
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
             className="border border-gray-300 rounded p-2 w-full"
           />
         </div>
 
-        {/* Submit Button */}
         <button
           type="submit"
           className={`p-2 rounded ${isFormValid ? "bg-blue-500 text-white hover:bg-blue-600" : "bg-gray-400 text-gray-200"}`}
@@ -128,19 +151,15 @@ export default function TransferMoney() {
         </button>
       </form>
 
-      {message && <p className="mt-4 text-green-500">{message}</p>}
-
-      {/* Back to Dashboard button at the end of the page */}
       <div className="mt-8">
         <button
-          onClick={() => router.push('/')} // Correct router navigation
+          onClick={() => router.push('/')}
           className="px-4 py-2 bg-teal-500 text-white rounded-md hover:bg-teal-600 transition-colors"
         >
           Back to Dashboard
         </button>
       </div>
 
-      {/* Snackbar/Toast container */}
       <ToastContainer />
     </div>
   );

@@ -34,10 +34,24 @@ export default function Dashboard() {
   const [submitedCodeStatus, setSubmitedCodeStatus] = useState("");
   const [showSecretKey, setShowSecretKey] = useState(false); // New state to track secret key visibility
 
+  const [jwksResponse, setJwksResponse] = useState("");
+
+async function fetchAccountNumber(username) {
+
+  const axiosInstance = axios.create({ baseURL: '/bff/api' });
+  try {
+    const accountResponse = await axiosInstance.get(`/api/accounts/${username}`);
+    console.log('AMOUNT',accountResponse.data.balance.amount);
+    setBalance(accountResponse.data.balance.amount); 
+  } catch (error) {
+    console.error("Error fetching account number:", error);
+  }
+}
+
   useEffect(() => {
     if (user.isAuthenticated) {
-      setBalance("$10,000"); // Mock balance data for demonstration
       handleLinkTotp();
+      fetchAccountNumber(user.name)
     }
   }, [user]);
 
@@ -112,6 +126,48 @@ export default function Dashboard() {
       setLoading(false);
     }
   };
+
+
+  const rotateJwks = async () => {
+    try {
+
+      const csrfToken = getCsrfToken();
+      if (!csrfToken) {
+        setStatusMessage("CSRF token not found.");
+        setLoading(false);
+        return;
+      }
+  
+      const response = await axios.post('auth/oauth2/jwks',
+       
+        {
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-TOKEN": csrfToken,
+        },
+        withCredentials: true,
+      });
+      setJwksResponse('JWKS rotated successfully.');
+      console.log('Rotate JWKS response:', response.data);
+    } catch (error) {
+      setJwksResponse('Failed to rotate JWKS.');
+      console.error('Error rotating JWKS:', error);
+    }
+  };
+
+  // Function to handle retrieving JWKS
+  const getJwks = async () => {
+    try {
+      const response = await axios.get('auth/oauth2/jwks');
+      setJwksResponse('JWKS retrieved successfully.');
+      console.log('Get JWKS response:', response.data);
+    } catch (error) {
+      setJwksResponse('Failed to retrieve JWKS.');
+      console.error('Error getting JWKS:', error);
+    }
+  };
+
+
 
   if (!user.isAuthenticated) {
     return (
@@ -199,11 +255,31 @@ export default function Dashboard() {
                 Balance
               </Typography>
               <Typography variant="h4" sx={{ color: "green", fontWeight: "bold" }}>
-                {balance}
+                {balance} MDL
               </Typography>
             </Paper>
           </Box>
         </Box>
+
+
+  {/* JWKS Control Buttons */}
+  <Box sx={{ position: 'absolute', bottom: 50, right: 20, display: 'flex', flexDirection: 'row', gap: 1 }}>
+  <Button variant="contained"  sx={{backgroundColor: '#121a2a !important',}}  onClick={rotateJwks}>
+    Rotate JWKS
+  </Button>
+  <Button variant="contained"  sx={{backgroundColor: '#121a2a !important',}} onClick={getJwks}>
+    Get JWKS
+  </Button>
+</Box>
+
+
+      {/* Display JWKS Response */}
+      {jwksResponse && (
+        <Typography variant="body1" sx={{ position: 'absolute', bottom: 10, right: 20 }}>
+          {jwksResponse}
+        </Typography>
+      )}
+
       </Box>
     );
   }

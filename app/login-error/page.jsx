@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 export default function LoginError() {
+  if (typeof window !== 'undefined') {
   const uri = window.location.search;
   const params = uri ? new URLSearchParams(uri.substring(1)) : new URLSearchParams();
 
@@ -22,4 +23,4 @@ export default function LoginError() {
       </div>
     </main>
   );
-}
+}}

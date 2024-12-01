@@ -41,7 +41,7 @@ export default function RegisterUser() {
         setStatusMessage('Failed to register user.');
       }
     } catch (error) {
-      setStatusMessage('Error occurred: ' + error.message);
+    //   setStatusMessage('Error occurred: ' + error.message);
     } finally {
       setLoading(false);
     }
