@@ -43,7 +43,7 @@ export default function TransactionHistory() {
 
     const axiosInstance = axios.create({ baseURL: '/bff/api' });
     try {
-      const accountResponse = await axiosInstance.get(`/api/transactions/getTransactions`,
+      const accountResponse = await axiosInstance.get(`/api/transactions/byAccountNum`,
         { params: { accountNum } }
       );
       setTransactions(accountResponse.data); 

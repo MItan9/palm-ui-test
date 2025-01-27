@@ -13,8 +13,8 @@ export default function TransferMoney() {
 
   const [senderUsername, setSenderUsername] = useState(""); 
   const [receiverUsername, setReceiverUsername] = useState(""); 
-  const [receiverId, setReceiverId] = useState(""); 
-  const [senderId, setSenderId] = useState(""); 
+  const [receiverNum, setReceiverNum] = useState(""); 
+  const [senderNum, setSenderNum] = useState(""); 
   const [amount, setAmount] = useState("");
   const [comment, setComment] = useState("");
 
@@ -31,12 +31,13 @@ export default function TransferMoney() {
     const axiosInstance = axios.create({ baseURL: '/bff/api' });
     try {
       const accountResponse = await axiosInstance.get(`/api/accounts/${username}`);
-      const accountId = accountResponse.data.id;
-      console.log(`${isSender ? 'Sender' : 'Receiver'} ID:`, accountId);
+
+      const accountNum = accountResponse.data.accountNum;
+      console.log(`${isSender ? 'Sender' : 'Receiver'} ID:`, accountNum);
       if (isSender) {
-        setSenderId(accountId);
+        setSenderNum(accountNum);
       } else {
-        setReceiverId(accountId);
+        setReceiverNum(accountNum);
       }
     } catch (error) {
       console.error(`Error fetching ${isSender ? 'sender' : 'receiver'} account number:`, error);
@@ -47,11 +48,12 @@ export default function TransferMoney() {
     event.preventDefault();
     if (user.isAuthenticated && parseFloat(amount) > 0) {
       const postData = {
-        senderAccountId: senderId, 
-        receiverAccountId: receiverId,
+        senderAccountNum: senderNum, 
+        receiverAccountNum: receiverNum,
         amount: parseFloat(amount),
         createdBy: senderUsername,
         description: comment
+
       };
 
       try {
@@ -86,7 +88,7 @@ export default function TransferMoney() {
     setComment("");
   };
 
-  const isFormValid = senderId && receiverId && parseFloat(amount) > 0;
+  const isFormValid = senderNum && receiverNum && parseFloat(amount) > 0;
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6">
